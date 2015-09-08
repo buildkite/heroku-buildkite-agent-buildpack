@@ -3,5 +3,5 @@
 cat << EOF
 ---
 default_process_types:
-  ci: /app/.buildkite/buildkite-agent start --bootstrap-script $BUILDKITE_BOOTSTRAP_SCRIPT --build-path /app/.buildkite/builds --hooks-path $BUILDKITE_HOOKS_PATH
+  ci: /app/.buildkite/buildkite-agent start --bootstrap-script $BUILDKITE_BOOTSTRAP_SCRIPT --build-path /app/.buildkite/builds --hooks-path $BUILDKITE_HOOKS_PATH --metadata "heroku=true"
 EOF
