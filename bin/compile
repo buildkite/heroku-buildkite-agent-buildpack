@@ -45,9 +45,9 @@ RUBY
 tar xzf "$cache_dir/buildkite-agent-latest.tar.gz" -C "$build_dir/$buildkite_dir"
 chmod +x "$build_dir/$buildkite_dir/buildkite-agent"
 
-cat << EOF > "$build_dir/.profile.d/buildkite.sh"
-export BUILDKITE_AGENT_BUILD_PATH="\${BUILDKITE_AGENT_BUILD_PATH:-/app/$buildkite_dir/builds}"
-export BUILDKITE_AGENT_HOOKS_PATH="\${BUILDKITE_AGENT_HOOKS_PATH:-/app/$buildkite_dir/hooks}"
-export BUILDKITE_AGENT_BOOTSTRAP_SCRIPT="\${BUILDKITE_AGENT_BOOTSTRAP_SCRIPT:-/app/$buildkite_dir/bootstrap.sh}"
+cat <<EOF > "$build_dir/.profile.d/buildkite.sh"
+BUILDKITE_HOOKS_PATH="\${BUILDKITE_HOOKS_PATH:-/app/$buildkite_dir/hooks}"
+BUILDKITE_BOOTSTRAP_SCRIPT="\${BUILDKITE_BOOTSTRAP_SCRIPT:-/app/$buildkite_dir/bootstrap.sh}"
+
 export BUILDKITE_AGENT_NAME="\${BUILDKITE_AGENT_NAME:-heroku-%n}"
 EOF
