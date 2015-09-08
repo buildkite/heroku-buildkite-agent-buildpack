@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Buildkite Agent"
+exit 0

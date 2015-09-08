@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+set -e
+
+build_dir="$1"
+cache_dir="$2"
+env_dir="$3"
+
+buildkite_dir=".buildkite"
+
+mkdir -p "$build_dir/$buildkite_dir/"{builds,hooks} "$build_dir/.profile.d" "$cache_dir"
+
+# TODO: what happens when we can't hit GH API. Can we try to fallback on the
+#       cache? If built at least once, there should be some agent there,
+#       presumably.
+read version file_name url <<< "$(ruby -rjson -rnet/https <<RUBY | xargs echo
+   http         = Net::HTTP.new("api.github.com", 443)
+   http.use_ssl = true
+   req          = Net::HTTP::Get.new("/repos/buildkite/agent/releases/latest")
+   body         = http.request(req).body
+   release      = JSON.parse(body)
+   asset        = release["assets"].detect { |a| a["state"] == "uploaded" && a["name"]["linux-amd64"] }
+   name         = asset["name"] if asset
+   url          = asset["url"] if asset
+
+   puts release["name"], name, url
+RUBY
+)"
+
+(
+    cd "$cache_dir"
+
+    if [ -f "$file_name" ]; then
+        # We already have the latest version
+        :
+    else
+        echo "-----> Installing Buildkite Agent $version"
+        curl --silent -L -o "$file_name" -H 'Accept: application/octet-stream' "$url"
+        ln -s "$file_name" buildkite-agent-latest.tar.gz
+    fi
+)
+
+# Don't overwrite files so that users can commit .buildkite/bootstrap.sh et al without it getting clobbered
+tar xzf "$cache_dir/buildkite-agent-latest.tar.gz" -C "$build_dir/$buildkite_dir"
+chmod +x "$build_dir/$buildkite_dir/buildkite-agent"
+
+cat << EOF > "$build_dir/.profile.d/buildkite.sh"
+export BUILDKITE_AGENT_BUILD_PATH="\${BUILDKITE_AGENT_BUILD_PATH:-/app/$buildkite_dir/builds}"
+export BUILDKITE_AGENT_HOOKS_PATH="\${BUILDKITE_AGENT_HOOKS_PATH:-/app/$buildkite_dir/hooks}"
+export BUILDKITE_AGENT_BOOTSTRAP_SCRIPT="\${BUILDKITE_AGENT_BOOTSTRAP_SCRIPT:-/app/$buildkite_dir/bootstrap.sh}"
+export BUILDKITE_AGENT_NAME="\${BUILDKITE_AGENT_NAME:-heroku-%n}"
+EOF

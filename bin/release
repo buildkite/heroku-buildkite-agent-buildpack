@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cat << EOF
+---
+default_process_types:
+  buildkite-agent: /app/.builkite/buildkite-agent
+EOF
