@@ -49,7 +49,12 @@ cat <<EOF > "$build_dir/.profile.d/buildkite.sh"
 BUILDKITE_HOOKS_PATH="\${BUILDKITE_HOOKS_PATH:-/app/$buildkite_dir/hooks}"
 BUILDKITE_BOOTSTRAP_SCRIPT="\${BUILDKITE_BOOTSTRAP_SCRIPT:-/app/$buildkite_dir/bootstrap.sh}"
 
-export BUILDKITE_AGENT_NAME="\${BUILDKITE_AGENT_NAME:-heroku-%n}"
+if [ "x\$BUILDKITE_AGENT_NAME" = "x" ]; then
+    # \$DYNO will be "dyno-process-type.pid" (e.g. agent.1)
+    BUILDKITE_AGENT_NAME="heroku-dyno.\$DYNO"
+fi
+
+export BUILDKITE_AGENT_NAME
 EOF
 
 if [ ! -f "$env_dir/BUILDKITE_AGENT_TOKEN" ]; then
