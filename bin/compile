@@ -51,3 +51,8 @@ BUILDKITE_BOOTSTRAP_SCRIPT="\${BUILDKITE_BOOTSTRAP_SCRIPT:-/app/$buildkite_dir/b
 
 export BUILDKITE_AGENT_NAME="\${BUILDKITE_AGENT_NAME:-heroku-%n}"
 EOF
+
+if [ ! -f "$env_dir/BUILDKITE_AGENT_TOKEN" ]; then
+    echo "-----> WARNING: No BUILDKITE_AGENT_TOKEN environment variable set!"
+    echo "       This needs to be set in order for the Buildkite agent to run."
+fi
